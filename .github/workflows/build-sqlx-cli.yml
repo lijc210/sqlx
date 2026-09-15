@@ -1,34 +1,47 @@
 name: Build sqlx-cli Linux amd64 musl
+
 on:
   workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+
     steps:
       - name: Checkout source
         uses: actions/checkout@v5
 
-      - name: Install musl system package
+      - name: Install musl tools
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Setup Rust + musl target
+      - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
-        with:
-          profile: minimal
-          targets: x86_64-unknown-linux-musl
+
+      - name: Install musl target
+        run: |
+          rustup target add x86_64-unknown-linux-musl
+          rustup target list --installed
+          rustc --version --verbose
 
       - name: Build static release binary
+        working-directory: sqlx-cli
         run: |
-          cd sqlx-cli
           cargo build --release \
             --target x86_64-unknown-linux-musl \
             --no-default-features \
-            --features rustls,postgres,mysql,sqlite
-          mv target/x86_64-unknown-linux-musl/release/sqlx ./sqlx-cli-linux-amd64-musl
-          sha256sum sqlx-cli-linux-amd64-musl > sha256sum.txt
+            # --features rustls,postgres,mysql,sqlite
+            --features rustls,postgres
+
+          mv target/x86_64-unknown-linux-musl/release/sqlx \
+             ./sqlx-cli-linux-amd64-musl
+
+          file ./sqlx-cli-linux-amd64-musl
+          ldd ./sqlx-cli-linux-amd64-musl || true
+
+          sha256sum ./sqlx-cli-linux-amd64-musl > sha256sum.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
