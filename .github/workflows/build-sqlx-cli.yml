@@ -9,19 +9,18 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
 
-      # 安装musl系统工具包
-      - name: Install musl-tools
+      - name: Install musl system library
         run: |
           sudo apt-get update
           sudo apt-get install -y musl-tools
 
-      - name: Install Rust
-        run: |
-          rustup toolchain install stable --profile minimal
-          rustup target add x86_64-unknown-linux-musl
-          rustup override set stable
+      - name: Setup Rust + musl target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          profile: minimal
+          targets: x86_64-unknown-linux-musl
 
-      - name: Cache cargo
+      - name: Cache cargo build
         uses: Swatinem/rust-cache@v2
 
       - name: Build static release binary
