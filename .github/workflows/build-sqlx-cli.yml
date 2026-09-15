@@ -1,9 +1,12 @@
 name: Build sqlx-cli Linux amd64 musl
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要构建的 Git tag"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -17,6 +20,7 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
         with:
+          ref: ${{ inputs.tag }}
           fetch-depth: 0
 
       - name: Install musl tools
@@ -30,7 +34,6 @@ jobs:
       - name: Install musl target
         run: |
           rustup target add x86_64-unknown-linux-musl
-          rustup target list --installed
 
       - name: Build static release binary
         working-directory: sqlx-cli
@@ -51,8 +54,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          tag_name: ${{ inputs.tag }}
+          name: ${{ inputs.tag }}
           generate_release_notes: true
           files: |
             sqlx-cli/sqlx-cli-linux-amd64-musl
