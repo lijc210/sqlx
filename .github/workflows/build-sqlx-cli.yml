@@ -1,6 +1,6 @@
 name: Build sqlx-cli Linux amd64 musl
 on:
-  workflow_dispatch: #手动触发
+  workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -9,13 +9,19 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v5
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          profile: minimal
-          targets: x86_64-unknown-linux-musl
+      # 安装musl系统工具包
+      - name: Install musl-tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
 
-      - name: Cache cargo build
+      - name: Install Rust
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup target add x86_64-unknown-linux-musl
+          rustup override set stable
+
+      - name: Cache cargo
         uses: Swatinem/rust-cache@v2
 
       - name: Build static release binary
@@ -26,9 +32,12 @@ jobs:
             --no-default-features \
             --features rustls,postgres,mysql,sqlite
           mv target/x86_64-unknown-linux-musl/release/sqlx ./sqlx-cli-linux-amd64-musl
+          sha256sum sqlx-cli-linux-amd64-musl > sha256sum.txt
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: sqlx-cli-linux-amd64-musl
-          path: sqlx-cli/sqlx-cli-linux-amd64-musl
+          path: |
+            sqlx-cli/sqlx-cli-linux-amd64-musl
+            sqlx-cli/sha256sum.txt
