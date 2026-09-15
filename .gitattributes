@@ -1,1 +1,6 @@
 * text=auto eol=lf
+
+# 合并上游时使用 ours 策略，保持本地删除状态
+.github/workflows/examples.yml merge=ours
+.github/workflows/sqlx-cli.yml merge=ours
+.github/workflows/sqlx.yml merge=ours
