@@ -34,7 +34,9 @@ jobs:
             --no-default-features \
             --features rustls,postgres,mysql,sqlite
 
-          mv target/x86_64-unknown-linux-musl/release/sqlx \
+          find .. -path '*/target/x86_64-unknown-linux-musl/release/sqlx' -type f -print
+
+          cp ../target/x86_64-unknown-linux-musl/release/sqlx \
              ./sqlx-cli-linux-amd64-musl
 
           file ./sqlx-cli-linux-amd64-musl
