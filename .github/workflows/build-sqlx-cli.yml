@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "要构建的 Git tag"
+        description: "要构建的 Git tag，例如 v0.9.0"
         required: true
         type: string
 
@@ -23,6 +23,12 @@ jobs:
           ref: ${{ inputs.tag }}
           fetch-depth: 0
 
+      - name: Verify tag
+        run: |
+          echo "Building tag: ${{ inputs.tag }}"
+          git describe --tags --exact-match HEAD
+          git status
+
       - name: Install musl tools
         run: |
           sudo apt-get update
@@ -34,6 +40,7 @@ jobs:
       - name: Install musl target
         run: |
           rustup target add x86_64-unknown-linux-musl
+          rustup target list --installed
 
       - name: Build static release binary
         working-directory: sqlx-cli
@@ -51,12 +58,12 @@ jobs:
 
           sha256sum ./sqlx-cli-linux-amd64-musl > sha256sum.txt
 
-      - name: Create GitHub Release
+      - name: Create or update GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag }}
           name: ${{ inputs.tag }}
-          generate_release_notes: true
+          generate_release_notes: false
           files: |
             sqlx-cli/sqlx-cli-linux-amd64-musl
             sqlx-cli/sha256sum.txt
