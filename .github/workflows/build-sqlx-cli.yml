@@ -32,8 +32,7 @@ jobs:
           cargo build --release \
             --target x86_64-unknown-linux-musl \
             --no-default-features \
-            # --features rustls,postgres,mysql,sqlite
-            --features rustls,postgres
+            --features rustls,postgres,mysql,sqlite
 
           mv target/x86_64-unknown-linux-musl/release/sqlx \
              ./sqlx-cli-linux-amd64-musl
