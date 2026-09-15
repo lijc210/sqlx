@@ -1,0 +1,33 @@
+name: Build sqlx-cli Linux amd64
+on:
+  workflow_dispatch: # 手动触发，在仓库Actions页面点Run workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sqlx source code
+        uses: actions/checkout@v4
+        with:
+          repository: launchbadge/sqlx
+          # ref: v0.9.2 # 固定指定版本，取消注释使用固定tag
+
+      - name: Setup Rust
+        uses: rust-lang/actions-rustup@v1
+        with:
+          toolchain: stable
+          profile: minimal
+
+      - name: Build sqlx-cli
+        run: |
+          cd sqlx-cli
+          cargo build --release \
+            --no-default-features \
+            --features rustls,postgres
+          mv target/release/sqlx ./sqlx-cli-linux-amd64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sqlx-cli-linux-amd64
+          path: sqlx-cli/sqlx-cli-linux-amd64
